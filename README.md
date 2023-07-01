@@ -1,15 +1,8 @@
-# Cookbook.dev
 
-## Find any smart contract, build your project faster
+### Deploying to Polygon
 
-Get ready-to-use Hardhat projects directly from https://www.cookbook.dev
+In this example, replace "YOUR_API_KEY" with your actual Etherscan API key. You can obtain an API key by creating an account on the Etherscan website (https://etherscan.io/) and generating an API key from your account settings.
 
-Example Contracts and Projects
+Save this configuration file as hardhat.config.js in the root directory of your Hardhat project. Make sure to install the necessary packages (@nomicfoundation/hardhat-toolbox, hardhat, and hardhat-ethers) by running npm install or yarn install.
 
-- [Simple Token](https://www.cookbook.dev/contracts/simple-token)
-- [Azuki EFC721A NFT](https://www.cookbook.dev/contracts/Azuki-ERC721A-NFT-Sale)
-- [Uniswap Labs](https://www.cookbook.dev/projects/Uniswap-Labs)
-- [Nouns DAO](https://www.cookbook.dev/projects/Nouns-DAO)
-- [OpenSea](https://www.cookbook.dev/projects/opensea)
-
-[Search for 100s of other contracts](https://www.cookbook.dev/search?q=&sort=popular&filter=&page=1)
+Now you can use Hardhat with the Polygon networks by running commands like npx hardhat --network mainnet <task> or npx hardhat --network mumbai <task>, where <task> represents the specific task or command you want to execute.
