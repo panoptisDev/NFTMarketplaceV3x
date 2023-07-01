@@ -1,20 +1,28 @@
-const hre = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
-  const contractName = "MarketplaceV3x";
-  const constructorArgs = [];
+  // Deploy the MarketplaceV3x contract
+  const MarketplaceV3x = await ethers.getContractFactory("MarketplaceV3x");
+  const marketplaceV3x = await upgrades.deployProxy(MarketplaceV3x);
 
-  const ContractFactory = await hre.ethers.getContractFactory(contractName);
-  const contract = await ContractFactory.deploy(...constructorArgs);
+  await marketplaceV3x.deployed();
 
-  await contract.deployed();
+  console.log("MarketplaceV3x deployed to:", marketplaceV3x.address);
 
-  console.log(`${contractName} has been deployed!`);
+  // Verify the contract on Etherscan
+  if (network.name !== "hardhat") {
+    await hre.run("verify:verify", {
+      address: marketplaceV3x.address,
+      constructorArguments: [],
+    });
+  }
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+
+  });
+  

@@ -6,13 +6,13 @@ const API_KEY = process.env.API_KEY || "YOUR_API_KEY";
 
 module.exports = {
   networks: {
-    mainnet: {
+    polygon: {
       url: "https://polygon-mainnet-rpc.com",
       accounts: [PRIVATE_KEY],
       gasPrice: 3000000, // Adjust the gas price as needed
     },
     mumbai: {
-      url: "https://polygon-mumbai-rpc.com",
+      url: "https://rpc.ankr.com/polygon_mumbai",
       accounts: [PRIVATE_KEY],
       gasPrice: 30000000, // Adjust the gas price as needed
     },
