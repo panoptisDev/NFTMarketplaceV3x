@@ -1,16 +1,26 @@
+![alt text](https://iili.io/HI49K6G.png)
+
+Progress 95%
+fork it if you want to help me finish this project.
+
+# MarketplaceV3x
+im rewriting the marketplace contract to use 5 nft collections instead of only 1
+
 
 ### Deploying to Polygon
 
-In this example, replace "YOUR_API_KEY" with your actual Etherscan API key. You can obtain an API key by creating an account on the Etherscan website (https://etherscan.io/) and generating an API key from your account settings.
-
-Save this configuration file as hardhat.config.js in the root directory of your Hardhat project. Make sure to install the necessary packages (@nomicfoundation/hardhat-toolbox, hardhat, and hardhat-ethers) by running npm install or yarn install.
-
-Now you can use Hardhat with the Polygon networks by running commands like npx hardhat --network mainnet <task> or npx hardhat --network mumbai <task>, where <task> represents the specific task or command you want to execute.
-
-
+1. Create a `.env` file in the root directory of the project
+2. Add the following variables to the `.env` file:
+MNEMONIC=<your mnemonic>
+API_KEY=<your polygonscan api key>
 
 ### Setup
 
+Nomic foundation released a new version of hardhat (2.15.0)
+
+npm install -g yarn
+yarn add --dev hardhat @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers ethers
+---
 
 ### Compile
 npx hardhat compile
@@ -22,23 +32,30 @@ npx hardhat run scripts/deploy.js --network mumbai
 npx hardhat verify --network mumbai <address> <unlock time>
 ---
 
-### got error code
-```
-npx hardhat run scripts/deploy.js --network mumbai
-
-TypeError: (0 , ethers_1.getAddress) is not a function
-    at new HardhatEthersSigner (/home/koko/NFTMarketplaceV3x/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:73:30)
-    at Function.create (/home/koko/NFTMarketplaceV3x/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:65:12)
-    at getSigner (/home/koko/NFTMarketplaceV3x/node_modules/@nomicfoundation/hardhat-ethers/src/internal/helpers.ts:60:29)
-    at async Promise.all (index 0)
-    at getSigners (/home/koko/NFTMarketplaceV3x/node_modules/@nomicfoundation/hardhat-ethers/src/internal/helpers.ts:45:30)
-    at getContractFactoryByAbiAndBytecode (/home/koko/NFTMarketplaceV3x/node_modules/@nomicfoundation/hardhat-ethers/src/internal/helpers.ts:305:21)
-    at main (/home/koko/NFTMarketplaceV3x/scripts/deploy.js:5:26)
-
-```
-### solution
-Nomic foundation released a new version of hardhat (2.15.0)
-Try:
 npm install -g yarn
 yarn add --dev hardhat @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers ethers
 ---
+### Verify script
+node verify.js --network <network-name> 
+
+---
+### Arguments
+
+The MarketplaceV3x contract has 11 constructor arguments:
+replace placeholder with address of the contract
+
+address _pluginMap
+address _defaultAdmin
+string memory _contractURI
+address[] memory _trustedForwarders
+address _platformFeeRecipient
+uint16 _platformFeeBps
+address _nftCollection1
+address _nftCollection2
+address _nftCollection3
+address _nftCollection4
+address _nftCollection5
+
+Please note that the address _pluginMap parameter is not part of the initialize function, but it is passed to the constructor of RouterImmutable which MarketplaceV3x inherits from.
+---
+
