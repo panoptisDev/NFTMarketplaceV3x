@@ -1,0 +1,239 @@
+// SPDX-License-Identifier: Apache-2.0
+
+pragma solidity ^0.8.0;
+/*
+creator panoptisDev:
+this is a contract that can hold 5 fiferent nft collections for a marketplace.
+no external proxies needed.
+*/
+contract IERC1155Receiver {
+    function onERC1155Received(address, address, uint256, uint256, bytes memory) public returns (bytes4);
+}
+
+contract IERC721Receiver {
+    function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4);
+}
+
+contract ContractMetadataLogic {
+    string private _contractURI;
+
+    function _setupContractURI(string memory contractURI) internal {
+        _contractURI = contractURI;
+    }
+
+    function contractURI() external view returns (string memory) {
+        return _contractURI;
+    }
+}
+
+contract PlatformFeeLogic {
+    struct PlatformFeeInfo {
+        address recipient;
+        uint16 basisPoints;
+    }
+
+    PlatformFeeInfo private _platformFeeInfo;
+
+    function _setupPlatformFeeInfo(address recipient, uint16 basisPoints) internal {
+        _platformFeeInfo = PlatformFeeInfo(recipient, basisPoints);
+    }
+
+    function getPlatformFeeInfo() external view returns (address recipient, uint16 basisPoints) {
+        recipient = _platformFeeInfo.recipient;
+        basisPoints = _platformFeeInfo.basisPoints;
+    }
+
+    function _canSetPlatformFeeInfo() internal view virtual returns (bool);
+
+    function setPlatformFeeInfo(address recipient, uint16 basisPoints) external {
+        require(_canSetPlatformFeeInfo(), "Cannot set platform fee info");
+        _platformFeeInfo = PlatformFeeInfo(recipient, basisPoints);
+    }
+}
+
+contract PermissionsEnumerableLogic {
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+
+    mapping(bytes32 => mapping(address => bool)) private _permissions;
+
+    function _setupRole(bytes32 role, address account) internal {
+        _permissions[role][account] = true;
+    }
+
+    function hasRole(bytes32 role, address account) internal view returns (bool) {
+        return _permissions[role][account];
+    }
+}
+
+contract ReentrancyGuardLogic {
+    uint256 private _guardCounter;
+
+    constructor() {
+        _guardCounter = 1;
+    }
+
+    modifier nonReentrant() {
+        _guardCounter += 1;
+        uint256 localCounter = _guardCounter;
+        _;
+        require(localCounter == _guardCounter, "ReentrancyGuard: reentrant call");
+    }
+
+    function __ReentrancyGuard_init() internal {
+        _guardCounter = 1;
+    }
+}
+
+contract ERC2771ContextUpgradeableLogic {
+    address internal immutable _trustedForwarder;
+
+    constructor(address trustedForwarder) {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    function __ERC2771Context_init(address[] memory trustedForwarders) internal {
+        if (trustedForwarders.length > 0) {
+            _trustedForwarder = trustedForwarders[0];
+            for (uint256 i = 1; i < trustedForwarders.length; i++) {
+                _addTrustedForwarder(trustedForwarders[i]);
+            }
+        }
+    }
+
+    function isTrustedForwarder(address forwarder) public view returns (bool) {
+        return forwarder == _trustedForwarder;
+    }
+
+    function _msgSender() internal view returns (address sender) {
+        if (isTrustedForwarder(msg.sender)) {
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return msg.sender;
+        }
+    }
+
+    function _msgData() internal view returns (bytes calldata) {
+        if (isTrustedForwarder
+    (msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return msg.data;
+        }
+    }
+
+    function _addTrustedForwarder(address forwarder) internal {
+        require(forwarder != address(0), "ERC2771Context: Zero address cannot be trusted forwarder");
+        _trustedForwarder = forwarder;
+    }
+}
+
+contract RouterImmutable {
+    address private _pluginMap;
+
+    constructor(address pluginMap) {
+        _pluginMap = pluginMap;
+    }
+
+    function pluginMap() external view returns (address) {
+        return _pluginMap;
+    }
+}
+
+contract MarketplaceV3x is
+    ContractMetadataLogic,
+    PlatformFeeLogic,
+    PermissionsEnumerableLogic,
+    ReentrancyGuardLogic,
+    ERC2771ContextUpgradeableLogic,
+    RouterImmutable,
+    IERC721Receiver,
+    IERC1155Receiver
+{
+    bytes32 private constant MODULE_TYPE = bytes32("MarketplaceV3x");
+    uint256 private constant VERSION = 1;
+
+    // State variables to store the addresses of the NFT collections
+    address public nftCollection1;
+    address public nftCollection2;
+    address public nftCollection3;
+    address public nftCollection4;
+    address public nftCollection5;
+
+    constructor(address pluginMap) RouterImmutable(pluginMap) {}
+
+    function initialize(
+        address defaultAdmin,
+        string memory contractURI,
+        address[] memory trustedForwarders,
+        address platformFeeRecipient,
+        uint16 platformFeeBps,
+        address nftCollection1,
+        address nftCollection2,
+        address nftCollection3,
+        address nftCollection4,
+        address nftCollection5
+    ) external {
+        require(!initialized(), "Already initialized.");
+
+        __ReentrancyGuard_init();
+        __ERC2771Context_init(trustedForwarders);
+
+        _setupContractURI(contractURI);
+        _setupPlatformFeeInfo(platformFeeRecipient, platformFeeBps);
+
+        _setupRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+        _setupRole(keccak256("LISTER_ROLE"), address(0));
+        _setupRole(keccak256("ASSET_ROLE"), address(0));
+
+        // Set the addresses of the NFT collections
+        nftCollection1 = nftCollection1;
+        nftCollection2 = nftCollection2;
+        nftCollection3 = nftCollection3;
+        nftCollection4 = nftCollection4;
+        nftCollection5 = nftCollection5;
+    }
+
+    function initialized() internal view returns (bool) {
+        return _permissions[DEFAULT_ADMIN_ROLE][msg.sender];
+    }
+
+    function contractType() external pure returns (bytes32) {
+        return MODULE_TYPE;
+    }
+
+    function contractVersion() external pure returns (uint8) {
+        return uint8(VERSION);
+    }
+
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
+    }
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(Router, IERC
